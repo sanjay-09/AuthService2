@@ -9,7 +9,10 @@ const userService=new UserService();
 const create=async function(req,res){
     try{
         
-        const user=await userService.create(req.body);
+        const user=await userService.create({
+            email:req.body.email,
+            password:req.body.password
+        });
         return res.status(successCodes.CREATED).json({
             data:user,
             status:true,
@@ -68,9 +71,32 @@ const SignIn=async function(req,res) {
     }
     
 }
+const isAuthenticated=async function(req,res){
+    try{
+        const token=req.headers['x-access-token']
+        const data=await userService.isAuthenticated(token);
+        return res.status(200).json({
+            data:data,
+            status:true,
+            message:"Able to authenticate the user",
+            err:{}
+
+        });
+
+    }
+    catch(err){
+        return res.status(500).json({
+            data:{},
+            success:false,
+            message:"Not able to authenticate the user",
+            err:err.err.message
+        })
+    }
+}
 
 module.exports={
     create,
     getById,
-    SignIn
+    SignIn,
+    isAuthenticated
 }

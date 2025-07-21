@@ -42,66 +42,132 @@ class UserService{
             throw err;
         }
     }
-    createToken(user){
-        try{
-            const token=jwt.sign(user,JWT_KEY,{
-                expiresIn:'1d'
-            });
-            return token;
+    // createToken(user){
+    //     try{
+    //         const token=jwt.sign(user,JWT_KEY,{
+    //             expiresIn:'1d'
+    //         });
+    //         return token;
 
-        }
-        catch(err){
-            throw err;
+    //     }
+    //     catch(err){
+    //         throw err;
 
-        }
-    }
+    //     }
+    // }
 
-    verifyToken(token){
-        try{
-            const isVerified=jwt.verify(token,JWT_KEY);
-            return isVerified;
+    // verifyToken(token){
+    //     try{
+    //         const isVerified=jwt.verify(token,JWT_KEY);
+    //         return isVerified;
 
-        }
-        catch(err){
+    //     }
+    //     catch(err){
 
-        }
-    }
+    //     }
+    // }
 
-    comparePassword(inComingPassword,dbPassword){
-        try{
-            return bcrypt.compareSync(inComingPassword,dbPassword);
+    // comparePassword(inComingPassword,dbPassword){
+    //     try{
+    //         return bcrypt.compareSync(inComingPassword,dbPassword);
 
-        }
-        catch(err){
-            throw err;
-        }
-    }
+    //     }
+    //     catch(err){
+    //         throw err;
+    //     }
+    // }
 
-    async login(data){
-        try{
-            const user=await this.getUserByEmail(data.email);
+    // async login(data){
+    //     try{
+    //         const user=await this.getUserByEmail(data.email);
        
         
-            if(!user){
-                throw new Error("please sign in to continue further");
+    //         if(!user){
+    //             throw new Error("please sign in to continue further");
 
-            }
-            const passwordChecker=this.comparePassword(data.password,user.password);
-            if(!passwordChecker){
-                throw new Error("password is incorrect please enter valid password")
+    //         }
+    //         const passwordChecker=this.comparePassword(data.password,user.password);
+    //         if(!passwordChecker){
+    //             throw new Error("password is incorrect please enter valid password")
 
-            }
-            const token=this.createToken({
-                email:user.email,
-                id:user.id
-            });
+    //         }
+    //         const token=this.createToken({
+    //             email:user.email,
+    //             id:user.id
+    //         });
+    //         return token;
+
+
+    //     }
+    //     catch(err){
+           
+    //         throw {err};
+    //     }
+    // }
+
+    createToken(data){
+        try{
+            const token=jwt.sign(data,JWT_KEY,{expiresIn:'1d'});
             return token;
+
+        }
+        catch(err){
+            throw err;
+        }
+    }
+    verifyToken(token){
+        try{
+            const data=jwt.verify(token,JWT_KEY);
+            return data;
+
+        }
+        catch(err){
+            throw err;
+
+        }
+    }
+    comparePassword(incomingPassword,dbPassword){
+        try{
+            return bcrypt.compareSync(incomingPassword,dbPassword);
+
+        }
+        catch(err){
+            throw err;
+        }
+    }
+    async login(data){
+        const user=await this.getUserByEmail(data.email);
+        if(!user){
+            throw new Error("user is not present please si")
+        }
+        const passwordChecker=this.comparePassword(data.password,user.password);
+        if(!passwordChecker){
+            throw new Error("incorrct password");
+        }
+        const token=this.createToken({
+            email:user.email,
+            id:user.id
+        });
+        
+        return token;
+    }
+    async isAuthenticated(token){
+        try{
+            const isTokenValid=this.verifyToken(token);
+            if(!isTokenValid){
+                throw new Error("token is not valid");
+            }
+            const user=await this.getUserById(isTokenValid.id);
+            if(!user){
+                throw new Error("user is not present in the db");
+            }
+            return user.id;
 
 
         }
         catch(err){
-           
             throw {err};
+
         }
     }
 
