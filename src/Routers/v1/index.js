@@ -8,6 +8,7 @@ router.post("/signup",UserMiddleware.userRequestValidator,UserController.create)
 router.get("/user/:id",UserController.getById);
 router.post("/signin",UserMiddleware.userRequestValidator,UserController.SignIn);
 router.get("/isAuthenticated",UserController.isAuthenticated);
+router.get("/isAdmin/:id",UserMiddleware.userRolesValidator,UserController.isAdmin);
 
 
 

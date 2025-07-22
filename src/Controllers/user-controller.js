@@ -1,6 +1,7 @@
 const {UserService}=require("../Service/index");
 
-const {successCodes}=require("../utils/error-codes");
+const {successCodes,serverErrorCodes}=require("../utils/error-codes");
+const AppError = require("../utils/Error/appError");
 
 
 
@@ -22,11 +23,22 @@ const create=async function(req,res){
 
     }
     catch(err){
-        return res.status(500).json({
+       if(err.name==='TypeError'){
+        const errObj=new AppError("Interal Code Error","Issue at the controller layer",serverErrorCodes.INTERNAL_SERVER_ERROR,"Controller");
+        return res.status(serverErrorCodes.INTERNAL_SERVER_ERROR).json({
             data:{},
             status:false,
             message:"not able to create the user",
-            err:{err}
+            err:errObj
+        })
+
+
+       }
+        return res.status(err.statusCode).json({
+            data:{},
+            status:false,
+            message:"not able to create the user",
+            err:err
         })
     }
 }
@@ -42,10 +54,22 @@ const getById=async function(req,res){
 
     }
     catch(err){
-        return res.status(500).json({
+         if(err.name==='TypeError'){
+        const errObj=new AppError("Interal Code Error","Issue at the controller layer",serverErrorCodes.INTERNAL_SERVER_ERROR,"Controller");
+        return res.status(serverErrorCodes.INTERNAL_SERVER_ERROR).json({
             data:{},
             status:false,
-            message:"not able to fetch the user"
+            message:"not able to create the user",
+            err:errObj
+        })
+
+
+       }
+        return res.status(err.statusCode).json({
+            data:{},
+            status:false,
+            message:"not able to fetch the user",
+            err:err
         })
     }
 }
@@ -62,11 +86,21 @@ const SignIn=async function(req,res) {
     }
     catch(err){
 
-        return res.status(500).json({
+        if(err.name==='TypeError'){
+        const errObj=new AppError("Interal Code Error","Issue at the controller layer",serverErrorCodes.INTERNAL_SERVER_ERROR,"Controller");
+        return res.status(serverErrorCodes.INTERNAL_SERVER_ERROR).json({
+            data:{},
+            status:false,
+            message:"not able to create the user",
+            err:errObj
+        })
+       }
+      
+        return res.status(err.statusCode).json({
             data:{},
             status:false,
             message:"Not able to fetch the token",
-            err:err.err.message || "something went wrong"
+            err:err
         })
     }
     
@@ -85,11 +119,41 @@ const isAuthenticated=async function(req,res){
 
     }
     catch(err){
-        return res.status(500).json({
+        return res.status(err.statusCode).json({
             data:{},
             success:false,
             message:"Not able to authenticate the user",
-            err:err.err.message
+            err:err
+        })
+    }
+}
+const isAdmin=async function(req,res){
+    try{
+        const data=await userService.isAdmin(req.params.id);
+        return res.status(successCodes.OK).json({
+            data:data,
+            status:true,
+            message:"successfully fetched the details",
+            err:{}
+        })
+
+    }
+    catch(err){
+           if(err.name==='TypeError'){
+        const errObj=new AppError("Interal Code Error","Issue at the controller layer",serverErrorCodes.INTERNAL_SERVER_ERROR,"Controller");
+        return res.status(serverErrorCodes.INTERNAL_SERVER_ERROR).json({
+            data:{},
+            status:false,
+            message:"not able to create the user",
+            err:errObj
+        })
+       }
+        return res.status(500).json({
+            data:{},
+            status:"false",
+            message:"Error fetching the details",
+            err:err.message
+
         })
     }
 }
@@ -98,5 +162,6 @@ module.exports={
     create,
     getById,
     SignIn,
-    isAuthenticated
+    isAuthenticated,
+    isAdmin
 }
